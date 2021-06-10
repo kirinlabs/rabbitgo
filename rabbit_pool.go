@@ -228,7 +228,6 @@ func (r *RabbitPool) Push(ch *Channel) {
 
 	r.m.Lock()
 	defer r.m.Unlock()
-	//ch.Ch.Confirm(true)
 	if inSlice(ch.ChId, r.idleChannel) {
 		return
 	}
