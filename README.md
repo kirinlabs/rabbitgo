@@ -18,7 +18,7 @@ func init(){
         ChannelActive: 20,
         ChannelIdle:   10,
     })
-    //设置日志打印级别
+    //设置日志打印级别，默认rabbitgo.LOG_DEBUG
     rabbit.SetLevel(rabbitgo.LOG_ERROR)
 }
 
