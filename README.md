@@ -16,7 +16,7 @@ func init(){
     Config{
         ConnectionMax: 5,
         ChannelActive: 20,
-        ChannelIdle:   5,
+        ChannelIdle:   10,
     })
 }
 
@@ -30,6 +30,52 @@ if err != nil {
     retrun err
 }
 defer rabbit.Push(ch)
+
+queue, err := ch.Ch.QueueDeclare("test_queue", true, false, false, false, nil)
+if err != nil {
+    log.Printf("Queue declare error, %s", err.Error())
+    return err
+}
+
+data := fmt.Sprintf("{\"code\":200,\"message\":\"success\",\"data\":\"%s\"}", time.Now().String())
+err = ch.Ch.Publish(
+        "",
+        qu.Name,
+        false,
+        false,
+        amqp.Publishing{
+        DeliveryMode: amqp.Persistent,
+        ContentType:  "appliction/plain",
+        Body:         []byte(data),
+    })
+if err != nil {
+    log.Printf("Send message error, %s", err.Error())
+    return err
+}
+```
+
+#### Sender Confirm
+```go
+ch, err := rabbit.Get()
+if err != nil {
+    log.Printf("Get channel error, %s", err.Error())
+    retrun err
+}
+defer rabbit.Push(ch)
+
+ch.Ch.Confirm(false)
+confirms := make(chan amqp.Confirmation)
+ch.Ch.NotifyPublish(confirms)
+
+defer func() {
+    if confirm := <-confirms; confirm.Ack {
+        // code when messages is confirmed
+        t.Logf("Confirmed tag %d", confirm.DeliveryTag)
+    } else {
+        // code when messages is nacked
+        t.Logf("Nacked tag %d", confirm.DeliveryTag)
+    }
+}()
 
 queue, err := ch.Ch.QueueDeclare("test_queue", true, false, false, false, nil)
 if err != nil {
