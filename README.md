@@ -40,7 +40,7 @@ if err != nil {
 data := fmt.Sprintf("{\"code\":200,\"message\":\"success\",\"data\":\"%s\"}", time.Now().String())
 err = ch.Ch.Publish(
         "",
-        qu.Name,
+        queue.Name,
         false,
         false,
         amqp.Publishing{
@@ -86,7 +86,7 @@ if err != nil {
 data := fmt.Sprintf("{\"code\":200,\"message\":\"success\",\"data\":\"%s\"}", time.Now().String())
 err = ch.Ch.Publish(
         "",
-        qu.Name,
+        queue.Name,
         false,
         false,
         amqp.Publishing{
