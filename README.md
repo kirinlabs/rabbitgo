@@ -1,13 +1,13 @@
 # rabbitgo
-Rabbitmq connection pool for golang
+基于golang的rabbitmq连接池
 
-### Installation
+### 安装rabbitgo
 go get github.com/kirinlabs/rabbitgo
 
 
-### How do we use rabbitgo?
+### 如何使用rabbitgo?
 
-#### Create request object use http.DefaultTransport
+#### 初始化全局连接池对象
 ```go
 var rabbit *rabbitgo.RabbitPool
 
@@ -18,17 +18,21 @@ func init(){
         ChannelActive: 20,
         ChannelIdle:   10,
     })
+    //设置日志打印级别
+    rabbit.SetLevel(rabbitgo.LOG_ERROR)
 }
 
 ```
 
 #### Sender
 ```go
+// 获取Channel对象
 ch, err := rabbit.Get()
 if err != nil {
     log.Printf("Get channel error, %s", err.Error())
     retrun err
 }
+// 重入channel池复用
 defer rabbit.Push(ch)
 
 queue, err := ch.Ch.QueueDeclare("test_queue", true, false, false, false, nil)
@@ -56,11 +60,13 @@ if err != nil {
 
 #### Sender Confirm
 ```go
+// 获取Channel对象
 ch, err := rabbit.Get()
 if err != nil {
     log.Printf("Get channel error, %s", err.Error())
     retrun err
 }
+// 重入channel池复用
 defer rabbit.Push(ch)
 
 ch.Ch.Confirm(false)

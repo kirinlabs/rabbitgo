@@ -21,9 +21,7 @@ func init() {
 		})
 }
 
-/*
-	go test -v -run TestSend
-*/
+// go test -v -run TestSend
 func TestSend(t *testing.T) {
 	ch, err := rabbit.Get()
 	if err != nil {
@@ -53,6 +51,7 @@ func TestSend(t *testing.T) {
 	}
 }
 
+// go test -v -run TestSendConfirm
 func TestSendConfirm(t *testing.T) {
 	ch, err := rabbit.Get()
 	if err != nil {
