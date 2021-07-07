@@ -1,4 +1,4 @@
-module rabbitgo
+module github.com/kirinlabs/rabbitgo
 
 go 1.16
 
