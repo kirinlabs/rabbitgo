@@ -12,7 +12,7 @@ go get github.com/kirinlabs/rabbitgo
 var rabbit *rabbitgo.RabbitPool
 
 func init(){
-    rabbit = New(fmt.Sprintf("amqp://%s:%s@%s:%d/%s", "guest", "guest", "127.0.0.1", 5672, ""),
+    rabbit = rabbitgo.New(fmt.Sprintf("amqp://%s:%s@%s:%d/%s", "guest", "guest", "127.0.0.1", 5672, ""),
     Config{
         ConnectionMax: 5,
         ChannelActive: 20,
