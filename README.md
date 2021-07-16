@@ -15,7 +15,7 @@ func init(){
     rabbit = rabbitgo.New(fmt.Sprintf("amqp://%s:%s@%s:%d/%s", "guest", "guest", "127.0.0.1", 5672, ""),
     Config{
         ConnectionMax: 5,
-		ChannelMax:    10,
+	ChannelMax:    10,
         ChannelActive: 20,
         ChannelIdle:   10,
     })
