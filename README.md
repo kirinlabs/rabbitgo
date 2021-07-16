@@ -15,6 +15,7 @@ func init(){
     rabbit = rabbitgo.New(fmt.Sprintf("amqp://%s:%s@%s:%d/%s", "guest", "guest", "127.0.0.1", 5672, ""),
     Config{
         ConnectionMax: 5,
+		ChannelMax:    10,
         ChannelActive: 20,
         ChannelIdle:   10,
     })
@@ -69,17 +70,14 @@ if err != nil {
 // 重入channel池复用
 defer rabbit.Push(ch)
 
-ch.Ch.Confirm(false)
-confirms := make(chan amqp.Confirmation)
-ch.Ch.NotifyPublish(confirms)
-
+ch.Confirm(false)
 defer func() {
-    if confirm := <-confirms; confirm.Ack {
+    if confirmed := <-ch.NotifyConfirm; confirmed.Ack {
         // code when messages is confirmed
-        t.Logf("Confirmed tag %d", confirm.DeliveryTag)
+        t.Logf("Confirmed tag %d", confirmed.DeliveryTag)
     } else {
         // code when messages is nacked
-        t.Logf("Nacked tag %d", confirm.DeliveryTag)
+        t.Logf("Nacked tag %d", confirmed.DeliveryTag)
     }
 }()
 

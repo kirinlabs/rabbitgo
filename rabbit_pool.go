@@ -39,10 +39,29 @@ type Connection struct {
 }
 
 type Channel struct {
-	ChId  int64
-	T     time.Time
-	Ch    *amqp.Channel
-	close bool
+	ChId          int64
+	T             time.Time
+	Ch            *amqp.Channel
+	NotifyConfirm chan amqp.Confirmation
+	close         bool
+}
+
+func (c *Channel) Confirm(noWait bool) error {
+	if noWait {
+		if c.NotifyConfirm != nil {
+			close(c.NotifyConfirm)
+		}
+	}
+
+	if err := c.Ch.Confirm(noWait); err != nil {
+		return err
+	}
+
+	if !noWait && c.NotifyConfirm == nil {
+		c.NotifyConfirm = c.Ch.NotifyPublish(make(chan amqp.Confirmation, 1))
+	}
+
+	return nil
 }
 
 // Rabbit connection pool
