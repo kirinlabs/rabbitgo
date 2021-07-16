@@ -247,6 +247,15 @@ func (r *RabbitPool) Push(ch *Channel) {
 
 	r.m.Lock()
 	defer r.m.Unlock()
+	if ch.NotifyConfirm != nil {
+		ch.Ch.Close()
+		if _, ok := <-ch.NotifyConfirm; ok {
+			close(ch.NotifyConfirm)
+		}
+		ch.NotifyConfirm = nil
+		initCh, _ := r.createChannel(r.connId(ch.ChId))
+		ch.Ch = initCh.Ch
+	}
 	if inSlice(ch.ChId, r.idleChannel) {
 		return
 	}

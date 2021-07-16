@@ -22,17 +22,17 @@ func init() {
 		})
 }
 
-// go test -v -run TestSend
-func TestSend(t *testing.T) {
+func sendWithoutConfirm(t *testing.T) error {
 	ch, err := rabbit.Get()
 	if err != nil {
-		t.Logf("Get channel error, %s", err.Error())
+		return fmt.Errorf("Get channel error, %s", err.Error())
 	}
 	defer rabbit.Push(ch)
+	t.Logf("Send messages without using confirm mode......, ChId %d", ch.ChId)
 
 	qu, err := ch.Ch.QueueDeclare(queue, true, false, false, false, nil)
 	if err != nil {
-		t.Logf("Queue declare error, %s", err.Error())
+		return fmt.Errorf("Queue declare error, %s", err.Error())
 	}
 
 	data := fmt.Sprintf("{\"code\":200,\"message\":\"success\",\"data\":\"%s\"}", time.Now().String())
@@ -48,12 +48,30 @@ func TestSend(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Logf("Send message error, %s", err.Error())
+		return fmt.Errorf("Send message error, %s", err.Error())
+	}
+	return nil
+}
+
+// go test -v -run TestSend
+func TestSend(t *testing.T) {
+	err := sendWithoutConfirm(t)
+	if err != nil {
+		t.Logf(err.Error())
 	}
 }
 
 // go test -v -run TestSendConfirm
 func TestSendConfirm(t *testing.T) {
+	go func() {
+		for {
+			if err := sendWithoutConfirm(t); err != nil {
+				t.Logf(err.Error())
+			}
+			time.Sleep(time.Second)
+		}
+	}()
+
 	for {
 		func() {
 			ch, err := rabbit.Get()
@@ -94,7 +112,7 @@ func TestSendConfirm(t *testing.T) {
 			if err != nil {
 				t.Logf("Send message error, %s", err.Error())
 			}
-			t.Logf("Send message success......")
+			t.Logf("Send messages with using confirm mode......, ChId %d", ch.ChId)
 		}()
 		time.Sleep(time.Second)
 	}
